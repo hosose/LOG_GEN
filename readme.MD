@@ -161,7 +161,7 @@ pip install -r generator/requirements.txt
   scripts\run-local.bat [DOMAIN] [DURATION] [RPS] [CORRUPTION] [OUTPUT] [TIME_SCALE]
 
   # 샘플 
-  scripts\run-local.bat finance 60 5 0.05 both 1
+  scripts\run-local.bat finance 10 5 0.05 both 1
 
   # 해석
   finance 도메인 로그 생성
@@ -202,6 +202,9 @@ pip install -r generator/requirements.txt
 ```
   # 전체 옵션
   scripts\run-generator.bat [DOMAIN] [DURATION] [BASE_RPS] [CORRUPTION_RATE] [TASK_COUNT] [REGION] [TIME_SCALE]
+
+  .\scripts\run-generator.bat ecommerce 10 2 0.05 1 ap-northeast-2 1
+
 
   # 흐름
   로컬 PC 명령 수행
