@@ -1,47 +1,59 @@
 variable "aws_region" {
-  description = "AWS Region to deploy resources"
+  description = "AWS 리전"
   type        = string
   default     = "ap-northeast-2"
 }
 
 variable "project_name" {
-  description = "Project name prefix for resources"
+  description = "리소스 이름에 사용할 프로젝트명"
   type        = string
-  default     = "log-gen"
+  default     = "de-ai-07-loggen"
 }
 
-variable "environment" {
-  description = "Deployment environment (e.g. dev, prod)"
+variable "vpc_cidr" {
+  description = "VPC CIDR, fargate 전용"
   type        = string
-  default     = "dev"
+  default     = "10.0.0.0/16"
 }
 
-variable "container_name" {
-  description = "ECS Container Name"
-  type        = string
-  default     = "log-generator"
+variable "public_subnet_cidrs" {
+  description = "Public Subnet CIDR 목록, fargate task 작동시 매번 다른 가용영역 사용"
+  type        = list(string)
+  # AZ 가용영역을 2개 사용 염두
+  default = ["10.20.1.0/24", "10.20.2.0/24"]
+
+  # 유효성 검사
+  validation {
+    # 최소 1개이상이면 정상
+    condition     = length(var.public_subnet_cidrs) >= 1
+    error_message = "최소 1개 퍼블릭 서브넷 CIDR 필수임"
+  }
 }
 
-variable "container_image" {
-  description = "ECR Image URI or placeholder"
-  type        = string
-  default     = ""
-}
-
-variable "ecs_task_cpu" {
-  description = "CPU units for ECS task (256 = 0.25 vCPU)"
-  type        = string
-  default     = "256"
-}
-
-variable "ecs_task_memory" {
-  description = "Memory for ECS task in MiB"
-  type        = string
+# fargate task CPU
+variable "task_cpu" {
+  description = "cpu unit => 512 == 0.5 vcpu"
+  type        = number
   default     = "512"
 }
 
-variable "log_retention_in_days" {
-  description = "CloudWatch log retention in days"
+# fargate task MEMORY
+variable "task_memory" {
+  description = "memory Mib"
+  type        = number
+  default     = 1024
+}
+
+# cloudwatch log 보관 일수
+variable "log_retention_days" {
+  description = "cloudwatch log retention period"
   type        = number
   default     = 7
+}
+
+# ECS TASK가 ECR 이미지 사용시 태그 -> latest
+variable "image_tag" {
+  description = "task가 정의될 때 참고하는 태그명, 가장 최신"
+  type        = string
+  default     = "latest"
 }
