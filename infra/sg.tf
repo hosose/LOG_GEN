@@ -1,56 +1,18 @@
-# 로그 생성기 전용 VPC
-resource "aws_vpc" "this" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
+# ecs => cloudwatch => s3, kinesis,.... , 외부 연결 x
+resource "aws_security_group" "fargate" {
+  name        = "${var.project_name}-fargate-sg"
+  description = "외부 연결 없이 fargate 전용"
+  vpc_id      = aws_vpc.this.id
+  #  ingress allow(허가) 정의 x => 모두 차단함
   tags = {
-    Name = "${var.project_name}-vpc"
-  }
-}
-# IGW, 외부에서 자유롭게 처리 가능
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
-
-  tags = {
-    Name = "${var.project_name}-igw"
-  }
-}
-# 각각 가용영역에 퍼블릭 서브넷 반영
-resource "aws_subnet" "public" {
-  # 2개
-  count = length(var.public_subnet_cidrs)
-
-  vpc_id            = aws_vpc.this.id
-  availability_zone = local.availability_zones[count.index]
-  cidr_block        = var.public_subnet_cidrs[count.index]
-  # NAT 없이 인터넷 통신 가능토록 Public IP 할당 (이 비용 월 0.5달러)
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.project_name}-public-${count.index + 1}"
-    Type = "loggen-public"
+    Name = "${var.project_name}-fargate-sg"
   }
 }
 
-# 라우트 테이블
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
-  tags = {
-    Name = "${var.project_name}-public-rt"
-  }
-}
-# 외부 트레픽을 IGW 전달
-resource "aws_route" "internet" {
-  route_table_id         = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.this.id
-}
-# 퍼블릭 서브넷, IGW (연결)
-resource "aws_route_table_association" "public" {
-  # 퍼블릭 서브넷 2개 -> 2번 연결
-  count = length(aws_subnet.public)
-
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
+# ECR push, Cloudwatch Logs 전송 => outbound 허용
+# 위에서 egress를 적용하지 않고, 다른 리소스에서 특정 sg에 반영하는 케이스
+resource "aws_vpc_security_group_egress_rule" "all" {
+  security_group_id = aws_security_group.fargate.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # -1 : 모든 프로토콜에 대응
 }
