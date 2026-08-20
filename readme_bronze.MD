@@ -125,3 +125,83 @@ docker build --no-cache --platform linux/amd64 -t "%REPO%:latest" "%GENERATOR%"
 # setup.sh
 docker build --no-cache --platform linux/amd64 -t "$REPO:latest" "$GENERATOR"
 ```
+
+# 브론즈 데이터 생성
+- 명령 옵션
+```
+ecommerce       도메인
+5               5초 실행
+5               기본 5 RPS
+0.05            오염 데이터 5%
+1               Fargate Task 1개
+ap-northeast-2  서울 리전
+1               Time Scale 1배
+```
+- 명령
+- 25건 로그 생성
+- Cloudwatch 로그 기록됨 (stdout 설정이 기본)
+- kinesis -> firehose -> s3 기록됨 (ecs 설정에 환경변수로 세팅되어 있음)
+- s3에서 로그 발생후 언제 확인 가능한가? -> 약간의 텀 존재함, 1분 이후 혹은 1Mib(firehose 버퍼링 조건) 초과 이후 확인 가능함
+```
+# 윈도우
+scripts/run-generator.bat ecommerce 5 5 0.05 1 ap-northeast-2 1
+# 맥
+sh /scripts/run-generator.bat ecommerce 5 5 0.05 1 ap-northeast-2 1
+
+----
+============================================================
+Fargate synthetic log generator
+============================================================
+Run ID          : loggen-1678413507-9513
+Domain          : ecommerce
+Duration        : 5s
+Base RPS        : 5
+Time scale      : 1
+Corruption rate : 0.05
+Tasks           : 1
+Region          : ap-northeast-2
+Cluster         : de-ai-25-loggen-cluster
+
+-----------------------------------------------------------------------------------------------------------                
+|                                                 RunTask                                                 |
++---------------------------------------------------------------------------------------------------------+
+|  arn:aws:ecs:ap-northeast-2:827913617635:task/de-ai-25-loggen-cluster/52f82a3a6648480d84627f811196ded4  |
++---------------------------------------------------------------------------------------------------------+
+
+
+Task started.
+Follow generated logs:
+  aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+```
+
+- 실시간 로그 확인
+```
+aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+---
+{"schema_version":"1.0","record_type":"application_log","event_id":"bdc9f274-7149-422e-b989-8dbbd145c2c8","trace_id":"2e5d3b9bf87e44208908c8bc6cb9620d","run_id":"loggen-1678413507-9513","occurred_at":"2026-08-20T14:51:40.714+09:00","generated_at_utc":"2026-08-20T05:51:40.714+00:00","domain":"ecommerce","event_type":"add_to_cart","service":{"name":"commerce-api","environment":"simulation","instance_id":"sim-07"}
+...
+```
+
+# jsonl => GZIP 변경하여 저장 (실습)
+- 동일 로그 발생 => 최종 결과문 GZIP으로 저장
+- 조치
+       - 수정
+       ```
+       # ~/infra/firehose.tf
+       # 주석 처리
+       # compression_format = "UNCOMPRESSED" # 1차는 원본 지정, 활성화되지 않음
+       # 주석 해제
+       compression_format = "GZIP" # GZIP으로 압축
+       ```
+       - 인프라 반영
+       ```
+       terraform -chdir=infra apply
+       ```
+       - 로그 발생
+       ```
+       scripts/run-generator.bat game 5 5 0.05 1 ap-northeast-2 1
+       ```
+       - s3 확인
+       ```
+       de-ai-25-loggen-firehose-3-2026-08-20-15-30-28-00497aef-2785-48e5-8f59-e6bab2038917.gz
+       ```
