@@ -54,8 +54,8 @@ class Settings:
     include_corruption_label: bool
     output_mode: str
     log_file: str
-    
-    #[브론즈 추가]
+
+    # [브론즈 추가]
     kinesis_enabled: bool
     kinesis_stream_name: str
 
@@ -78,8 +78,7 @@ class Settings:
 
         # 2. 실행 지속시간을 초 단위로 읽음
         duration_seconds = _env_int("DURATION_SECONDS", 300)
-
-        # 3. 최대 이벤트 수를 읽으며 0은 개수 제한을 사용하지 않음 <- 위치 조정
+        # 3. 최대 이벤트 수를 읽으며 0은 개수 제한을 사용하지 않음 <- 위치조정
         max_events = _env_int("MAX_EVENTS", 0)
 
         # 실행 시간이 음수인지 검증
@@ -123,9 +122,9 @@ class Settings:
         # seed가 있으면 정수로 변환하고 없으면 None 사용
         seed = int(seed_raw) if seed_raw else None
 
-        # [브론즈 추가] AWS Kinesis 관련 설정
+        # [브론즈 추가]
+        # KINESIS 사용여부
         kinesis_enabled = _env_bool("KINESIS_ENABLED", False)
-        kinesis_stream_name = _env("KINESIS_STREAM_NAME", "de-ai-07-loggen-kinesis")
 
         # 검증이 끝난 환경변수 값으로 Settings 객체 생성 -> 클레스에 인자 넣어서 객체 생성
         return cls(
@@ -144,8 +143,4 @@ class Settings:
             environment                     =_env("ENVIRONMENT", "simulation"),
             run_id                          =_env("RUN_ID", "manual"),
             seed                            =seed,
-            
-            #[브론즈 추가]
-            kinesis_enabled                 =kinesis_enabled,
-            kinesis_stream_name             =kinesis_stream_name,
         )
