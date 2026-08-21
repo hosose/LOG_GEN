@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "리소스 이름에 사용할 프로젝트명"
   type        = string
-  default     = "de-ai-25-loggen"
+  default     = "de-ai-07-loggen"
 }
 
 variable "vpc_cidr" {
@@ -152,7 +152,7 @@ variable "flink_source_init_position" {
     condition = contains([
       "LATEST",
       "TRIM_HORIZON"
-    ], var.flink_source_init_poisition)
-    error_message = "flink_source_init_poisition is only LATEST or TRIM_HORIZON"
+    ], var.flink_source_init_position)
+    error_message = "flink_source_init_position is only LATEST or TRIM_HORIZON"
   }
 }

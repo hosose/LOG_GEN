@@ -77,9 +77,10 @@ def _property_map(properties: list[dict], group_id: str) -> dict:
 
     for prop in properties:
         # Runtime Property 목록을 하나씩 순회한다.
+        pg_id = prop.get("PropertyGroupId", "")
 
-        if prop.get("PropertyGroupId") == group_id:
-            # 현재 Property Group의 ID가 찾고 있는 group_id와 같은지 확인한다.
+        if pg_id == group_id or pg_id.rstrip("0") == group_id.rstrip("0"):
+            # 현재 Property Group의 ID가 찾고 있는 group_id와 같은지 확인한다. (예: InputStream vs InputStream0 호환)
 
             return prop.get("PropertyMap", {})
             # 일치하면 해당 그룹의 실제 설정값인 PropertyMap을 반환한다.

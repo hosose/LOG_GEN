@@ -2,7 +2,7 @@
   {
     "PropertyGroupId": "InputStream0",
     "PropertyMap": {
-      "stream.arn": "arn:aws:kinesis:ap-northeast-2:123456789012:stream/de-ai-25-loggen-kinesis",
+      "stream.arn": "arn:aws:kinesis:ap-northeast-2:827913617635:stream/de-ai-07-loggen-kinesis",
       "aws.region": "ap-northeast-2",
       "flink.source.init.position": "LATEST"
     }
@@ -10,7 +10,7 @@
   {
     "PropertyGroupId": "OutputStream0",
     "PropertyMap": {
-      "stream.arn": "arn:aws:kinesis:ap-northeast-2:123456789012:stream/de-ai-25-loggen-silver-kinesis",
+      "stream.arn": "arn:aws:kinesis:ap-northeast-2:827913617635:stream/de-ai-07-loggen-silver-kinesis",
       "aws.region": "ap-northeast-2"
     }
   }
