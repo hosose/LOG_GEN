@@ -160,23 +160,23 @@ Time scale      : 1
 Corruption rate : 0.05
 Tasks           : 1
 Region          : ap-northeast-2
-Cluster         : de-ai-25-loggen-cluster
+Cluster         : de-ai-07-loggen-cluster
 
 -----------------------------------------------------------------------------------------------------------                
 |                                                 RunTask                                                 |
 +---------------------------------------------------------------------------------------------------------+
-|  arn:aws:ecs:ap-northeast-2:827913617635:task/de-ai-25-loggen-cluster/52f82a3a6648480d84627f811196ded4  |
+|  arn:aws:ecs:ap-northeast-2:827913617635:task/de-ai-07-loggen-cluster/52f82a3a6648480d84627f811196ded4  |
 +---------------------------------------------------------------------------------------------------------+
 
 
 Task started.
 Follow generated logs:
-  aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+  aws logs tail "/ecs/de-ai-07-loggen" --follow --region "ap-northeast-2"
 ```
 
 - 실시간 로그 확인
 ```
-aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+aws logs tail "/ecs/de-ai-07-loggen" --follow --region "ap-northeast-2"
 ---
 {"schema_version":"1.0","record_type":"application_log","event_id":"bdc9f274-7149-422e-b989-8dbbd145c2c8","trace_id":"2e5d3b9bf87e44208908c8bc6cb9620d","run_id":"loggen-1678413507-9513","occurred_at":"2026-08-20T14:51:40.714+09:00","generated_at_utc":"2026-08-20T05:51:40.714+00:00","domain":"ecommerce","event_type":"add_to_cart","service":{"name":"commerce-api","environment":"simulation","instance_id":"sim-07"}
 ...
@@ -203,5 +203,5 @@ aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
        ```
        - s3 확인
        ```
-       de-ai-25-loggen-firehose-3-2026-08-20-15-30-28-00497aef-2785-48e5-8f59-e6bab2038917.gz
+       de-ai-07-loggen-firehose-3-2026-08-20-15-30-28-00497aef-2785-48e5-8f59-e6bab2038917.gz
        ```

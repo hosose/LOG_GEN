@@ -154,18 +154,18 @@ Time scale      : 1
 Corruption rate : 0.20
 Tasks           : 1
 Region          : ap-northeast-2
-Cluster         : de-ai-25-loggen-cluster
+Cluster         : de-ai-07-loggen-cluster
 
 -----------------------------------------------------------------------------------------------------------                           
 |                                                 RunTask                                                 |
 +---------------------------------------------------------------------------------------------------------+
-|  arn:aws:ecs:ap-northeast-2:827913617635:task/de-ai-25-loggen-cluster/f670ea4a0575429b861e182864f335c2  |
+|  arn:aws:ecs:ap-northeast-2:827913617635:task/de-ai-07-loggen-cluster/f670ea4a0575429b861e182864f335c2  |
 +---------------------------------------------------------------------------------------------------------+
 
 
 Task started.
 Follow generated logs:
-  aws logs tail "/ecs/de-ai-25-loggen" --follow --region "ap-northeast-2"
+  aws logs tail "/ecs/de-ai-07-loggen" --follow --region "ap-northeast-2"
 ```
 
 # 트레블 슈팅
@@ -176,7 +176,7 @@ terraform state list
 # AlreadyExists => 예전게 남아 있는 경우 
 # 리소스 등록분에서 누락된 부분이 잇으면 수동 연결
 # terraform import 리소스명 리소스값
-terraform import aws_ecr_repository.generator de-ai-25-loggen-repo
+terraform import aws_ecr_repository.generator de-ai-07-loggen-repo
 
 
 ```
@@ -189,7 +189,7 @@ terraform import aws_ecr_repository.generator de-ai-25-loggen-repo
 
     - 오염된 데이터 삭제(현재) => 별도 보관(저장) => 추후 해당 원인 분석 할수 있게 보관 (확장)
     - 저장데이터 -> jsonl (gzip) => parquet 저장(glue 사용)
-    - flink 역활 lambda 대체 (차이점 이해)
+    - flink 역할 lambda 대체 (차이점 이해)
   - 실버 -> 골드 추가
     - flink or lambda 사용 가능 => 최종 목표 형태로 가공
     - 중간 과정 동일
