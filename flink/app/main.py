@@ -4,12 +4,11 @@
 from __future__ import annotations
 import json
 import os
-# pyrefly: ignore [missing-import]
 from pyflink.table import DataTypes, EnvironmentSettings, TableEnvironment
 # 일반 파이썬 함수를 Flink SQL에서 호출 가능하게 등록 처리(UDF : User Defined Function)
-# pyrefly: ignore [missing-import]
 from pyflink.table.udf import udf
-from transform import clean_event_payload
+# [REJECT]
+from transform import clean_event_payload,reject_event_payload
 
 # 테라폼이 인프라 구성시 자동으로 설정
 MANAGED_PROPERTIES_PATH = "/etc/flink/application_properties.json"
@@ -20,6 +19,13 @@ IS_LOCAL = bool(os.environ.get("IS_LOCAL"))
 def clean_event(payload: str):
     # 정제, 전처리 전담 함수를 래핑
     return clean_event_payload(payload)
+
+# [REJECT]
+@udf(result_type=DataTypes.STRING())
+def reject_event(payload: str):
+    # 오염데이터 전담 함수를 래핑
+    return reject_event_payload(payload)
+
 
 # flink 경로 계산을 위한 함수
 def _project_dir() -> str:
@@ -77,6 +83,8 @@ def main() -> None:
     input_props = _property_map(properties, "InputStream0")
     # 4. 런타임 속성에서 OutputStream0 이름의 키네시스 정보 획득. 실버 출력
     output_props = _property_map(properties, "OutputStream0")
+    # [REJECT] 비정상 데이터 출력용 kinesis 설정
+    reject_props = _property_map(properties, "RejectStream0")
 
     # 5. 키네시스 arn, 리전, 입력시 어디서부터 읽을 것인지 등 정보 로드
     input_stream_arn = input_props["stream.arn"]
@@ -84,6 +92,9 @@ def main() -> None:
     input_init_position = input_props.get("flink.source.init.position", "LATEST")
     output_stream_arn = output_props["stream.arn"]
     output_region = output_props["aws.region"]
+    # [REJECT]
+    reject_stream_arn = reject_props["stream.arn"]
+    reject_region = reject_props["aws.region"]
 
     # 6. 파이썬 함수 clean_event를 Flink SQL 내부에서 clean_event(..)로 사용하도록 등록
     table_env.create_temporary_system_function("clean_event", clean_event)

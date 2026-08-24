@@ -25,7 +25,7 @@ resource "aws_kinesis_firehose_delivery_stream" "rejected" {
   name        = local.rejected_firehose_name
   destination = "extended_s3"
 
-  # 입력소스 (키네시스, 역할 설정)
+  # 입력소스 (키네시스, 역활 설정)
   kinesis_source_configuration {
     kinesis_stream_arn = aws_kinesis_stream.rejected.arn
     role_arn           = aws_iam_role.firehose_rejected.arn
@@ -35,7 +35,7 @@ resource "aws_kinesis_firehose_delivery_stream" "rejected" {
   extended_s3_configuration {
     # 버킷
     bucket_arn = aws_s3_bucket.data.arn
-    # 역할
+    # 역활
     role_arn = aws_iam_role.firehose_rejected.arn
 
     # 버퍼 관련 용량, 시간 설정

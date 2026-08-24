@@ -27,6 +27,7 @@ resource "aws_s3_object" "flink_app" {
 
 # flink 자체 내용
 resource "aws_kinesisanalyticsv2_application" "silver" {
+  provider = aws.flink_no_tags
   # flink 리소스 이름
   name = local.flink_application_name
   # 설명
@@ -67,22 +68,36 @@ resource "aws_kinesisanalyticsv2_application" "silver" {
           "flink.source.init.position" = var.flink_source_init_position
         }
       }
-
+      # silver kinesis, flink에서 출력하는 대상
       property_group {
-        property_group_id = "OutputStream"
+        property_group_id = "OutputStream0"
 
         property_map = {
           "stream.arn" = aws_kinesis_stream.silver.arn
           "aws.region" = var.aws_region
         }
       }
+      # [REJECT] rejected kinesis, flink에서 출력하는 대상
+      property_group {
+        property_group_id = "RejectStream0"
+
+        property_map = {
+          "stream.arn" = aws_kinesis_stream.rejected.arn
+          "aws.region" = var.aws_region
+        }
+      }
+
 
       property_group {
+        # AWS Managed Flink를 인식하는 예약 그룹명 (실행 옵션) -> 고정값
         property_group_id = "kinesis.analytics.flink.run.options"
 
         property_map = {
-          "python"  = "main.py"
+          # flink 앱의 엔트리 포인트
+          "python" = "main.py"
+          # pyFlink에서 kinesis 접근 -> 드라이브(라이브러리) 필요 -> *.jar
           "jarfile" = "lib/pyflink-dependencies.jar"
+          # python UDF Worker가 transform.py를 import 하도록 등록
           "pyFiles" = "transform.py"
         }
       }
@@ -121,8 +136,8 @@ resource "aws_kinesisanalyticsv2_application" "silver" {
     aws_s3_object.flink_app
   ]
 
-  tags = {
-    DataLayer = "silver"
-    Processor = "flink"
-  }
+  #tags = {
+  #  DataLayer = "silver"
+  #  Processor = "flink"
+  #}
 }
