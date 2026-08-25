@@ -189,7 +189,7 @@ terraform import aws_ecr_repository.generator de-ai-25-loggen-repo
 
     - 오염된 데이터 삭제(현재) => 별도 보관(저장) => 추후 해당 원인 분석 할수 있게 보관 (확장)
     - 저장데이터 -> jsonl (gzip) => parquet 저장(glue 사용)
-    - flink 역활 lambda 대체 (차이점 이해)
+    - flink 역할 lambda 대체 (차이점 이해)
   - 실버 -> 골드 추가
     - flink or lambda 사용 가능 => 최종 목표 형태로 가공
     - 중간 과정 동일
@@ -307,5 +307,13 @@ Bronze Kinesis -> 배치 프로세싱으로 통해 오염 데이터만 추출하
 - outputs.tf
   - glue 관련 이름, 리소스등 출력
 
-
-### silver.tf (수정)
+- 인프라 반영
+  - terraform -chdir=infra plan
+  - terraform -chdir=infra apply
+  - fink 앱 가동(대시보드 or flink-start.bat)
+  - flink-status.bat => RUNNING
+  - 로그 발송
+  - 1분후 > s3://버킷/silver/..../*.parquet 확인 => 다운로드 => 구글 parquet 뷰어 => 드레그드롭
+  - Glue가서 데이데이스, 테이블등 각각 조회 > 스키마 확인
+  - fink 앱 중지(대시보드 or flink-stop.bat)
+  - flink-status.bat => READY

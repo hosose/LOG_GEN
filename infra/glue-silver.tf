@@ -71,7 +71,7 @@ resource "aws_glue_catalog_table" "silver" {
     # parquet 내부에서 SNAPPY 압축 활용
     compressed = true
 
-    # parquet 파일과 Glue/Athena등 테이블간 사이에서 데이터 구조 해석하는 역활
+    # parquet 파일과 Glue/Athena등 테이블간 사이에서 데이터 구조 해석하는 역할
     ser_de_info {
       # 식별을 위한 이름
       name = "silver-parquet"
