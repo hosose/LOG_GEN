@@ -189,7 +189,7 @@ terraform import aws_ecr_repository.generator de-ai-07-loggen-repo
 
     - 오염된 데이터 삭제(현재) => 별도 보관(저장) => 추후 해당 원인 분석 할수 있게 보관 (확장)
     - 저장데이터 -> jsonl (gzip) => parquet 저장(glue 사용)
-    - flink 역활 lambda 대체 (차이점 이해)
+    - flink 역할 lambda 대체 (차이점 이해)
   - 실버 -> 골드 추가
     - flink or lambda 사용 가능 => 최종 목표 형태로 가공
     - 중간 과정 동일
@@ -238,6 +238,10 @@ Bronze Kinesis -> 배치 프로세싱으로 통해 오염 데이터만 추출하
     - 대상 : kinesis 신규, kinesis->firehose, iam, flink, locals, variables, outputs    
   - flink 수정 -> 테스트 -> 오염데이터를 비율 30% 상승 -> 로그 발생 -> 오염데이터 저장 확인
 - 실행 절차
-  - flink 앱 빌드
-  - 인프라 업데이트 및 앱 배포
+  - flink 앱 빌드 + 인프라 업데이트 및 앱 배포
+    ```
+      scripts\setup-flink.bat
+      
+      sh ./scripts/setup-flink.sh
+    ```
   - 로그 제너레이터 가동 -> 오염도를 30% 올려서 잘 수집되도록 구성
