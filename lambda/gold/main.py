@@ -6,6 +6,9 @@ silver kinesis -> (lambda 함수 => 100건당 함수가 호출 => 지연에 대�
 - gold 데이터는 64MB 혹은 1분단위로 지연에 대한 집계처리가 모여서 구성 : 데이터마트 준해서 구성
 - 추후 대시보드는 gold를 바라보고 1분단위 혹은 64MB단위로 화면을 갱신하면서 
   실시간 현황 표현(실제 데이터보다 n분(얼마 단위로 설계->파이프라인 구성 영향) 정도 늦게 반영)
+
+- 람다 기본 파이썬만 구성되어 있음 => 추가 라이브러리 사용 => zip 같이 묶어서 배포(번잡함)
+- 아래 구성 코드는 순수 파이썬 + 기본라이브러리만 이용 레코드 처리
 '''
 from __future__ import annotations
 
@@ -31,6 +34,9 @@ kinesis = boto3.client("kinesis", region_name=AWS_REGION)
 
 
 def _decode_kinesis_record(record: dict[str, Any]) -> dict[str, Any]:
+    '''
+    람다에 전달된 event(데이터 1개)를  json 객체로 복원(역직렬화)
+    '''
     encoded = record["kinesis"]["data"]
 
     payload = base64.b64decode(encoded).decode("utf-8")
@@ -38,8 +44,10 @@ def _decode_kinesis_record(record: dict[str, Any]) -> dict[str, Any]:
     value = json.loads(payload)
 
     if not isinstance(value, dict):
+        # 형식에 문제가 발생 => 오류 반환
         raise ValueError("Silver payload must be a JSON object.")
 
+    # dict 객체 반환
     return value
 
 
@@ -187,12 +195,17 @@ def lambda_handler(
     event: dict[str, Any],
     context: Any,
 ) -> dict[str, Any]:
+    # event는 kinesis로부터 흘러 들어오는 데이터 1개, 1개를 의미함
+    
+    # 정상적으로 처리된 silver 데이터 저장 공간
     silver_events: list[dict[str, Any]] = []
-
+    # 응답 실패용 저장하는 공간
     batch_failures: list[dict[str, str]] = []
 
+    # 이벤트(데이터 1개 획득) -> n번 반복
     for record in event.get("Records", []):
         try:
+            # 정상 데이터로 보고 추가 -> 오류발생 -> 예외처리 -> batch_failures 저장
             silver_events.append(
                 _decode_kinesis_record(record)
             )
@@ -209,7 +222,7 @@ def lambda_handler(
                         "itemIdentifier": sequence_number
                     }
                 )
-
+            # 로그 -> CloudWatch에서 조회 가능
             print(
                 f"[WARN] Failed to decode Silver record: {exc}"
             )
