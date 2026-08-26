@@ -3,7 +3,7 @@
 # ---------------------------------------------
 
 # 데이터 구조, 위치등 Meta 데이터를 관리하는 서비스
-# AWS Glue Data Catalog > database > de-ai-25-loggen-silver-glue-db
+# AWS Glue Data Catalog > database > de-ai-07-loggen-silver-glue-db
 
 # 1. 데이터베이스 구성
 resource "aws_glue_catalog_database" "silver" {

@@ -245,4 +245,138 @@ Silver Kinesis
 # 인프라 구성
 - gold-lambda.tf
 
+# Athena 쿼리 수행 (silver 레벨)
+```
+# 전체 테이블 조회 
+show tables;
+
+# 테이블 스키마 확인
+describe silver_logs_tbl;
+
+# 특정 시간대 전체 건수 (파티션 활용)
+select count(*) as cnt
+from silver_logs_tbl
+where year='2026' and month='08' and day='25' and hour='14'
+;
+
+
+# 중첩 스트럭처 출력
+# 이름.맴버
+select
+    domain,
+    event_type,
+    service.name,
+    request.method,
+    request.path,
+    response.status_code,
+    response.latency_ms
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+limit 10
+;
+
+# 도메인별 로그 개수 집계 쿼리 작성 (실습)
+# 단, 2026년 8월 25일 14시 기준
+# 1. domain, cnt 로 출력, cnt 기준 내림차순 정렬
+select
+    domain,
+    count(*) as cnt
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+GROUP BY domain
+ORDER BY cnt DESC
+;
+
+
+# 2. 도메인별 이벤트 타입별 발생 건수
+#    domain, event_type, cnt
+#    domain, cnt 기준 내림차순 정렬
+select
+    domain,
+    event_type,
+    count(*) as cnt
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+GROUP BY domain, event_type
+ORDER BY domain, cnt DESC
+;
+
+
+# 응답 HTTP 상태코드별 건수 집계
+# domain, event_type, status_code, cnt 출력
+# 집계대상은 domain, event_type, status_code
+# 정렬은 event_type ASC, status_code DESC
+select
+    domain,
+    event_type,
+    response.status_code,
+    count(*) as cnt
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+GROUP BY domain, event_type, response.status_code
+ORDER BY event_type ASC, response.status_code DESC
+;
+
+
+# 에러만 집계 (응답코드 >= 400)
+# event_type, event_type 별 개수(cnt) 출력
+# event_type에 따른 오류 응답 개수 체크
+select 
+    event_type, 
+    count(*) as cnt
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+	and response.status_code >= 400
+GROUP BY event_type
+ORDER BY cnt DESC
+
+
+# 서비스별 평균응답 시간
+# 서비스명, 응답시간 평균, 응답시간 최대값, 서비스별개수
+# KPI(핵심성과지표) 항목을 이용하여 조직/개인의 성과(목표)에 대한 달성여부 객곽적인 수치로 평가등에 활용 
+select 
+    service.name as service_name, 
+    avg( response.latency_ms ) as avg_latency_ms,
+    max( response.latency_ms ) as max_latency_ms,
+    count(*) as cnt
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+GROUP BY service.name
+ORDER BY avg_latency_ms DESC
+;
+select 
+    event_type, 
+    avg( response.latency_ms ) as avg_latency_ms,
+    max( response.latency_ms ) as max_latency_ms,
+    count(*) as cnt
+from silver_logs_tbl
+where year = '2026'
+	and month = '08'
+	and day = '25'
+	and hour = '14'
+GROUP BY event_type
+ORDER BY avg_latency_ms DESC
+;
+
+
+```
+
 # 람다 코드 작성
